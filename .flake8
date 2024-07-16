@@ -1,0 +1,15 @@
+[flake8]
+# select all
+select = A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z
+max-line-length = 88
+inline-quotes = double
+exclude = .venv, .git, .eggs, __pycache__, build, dist, __init__.py, .ipynb, .ipynb_checkpoints
+ignore =
+    # disable, whitespace before ':'
+    E203,
+    # disable "too many leading '#' for block comment"
+    E266,
+    # disable "line break before binary operator" which clashes with black
+    W503,
+    # disable "invalid escape sequence"
+    W605,

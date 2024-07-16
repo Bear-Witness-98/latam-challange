@@ -1,19 +1,15 @@
+from typing import List, Tuple, Union
+
 import pandas as pd
 
-from typing import Tuple, Union, List
 
 class DelayModel:
-
-    def __init__(
-        self
-    ):
-        self._model = None # Model should be saved in this attribute.
+    def __init__(self):
+        self._model = None  # Model should be saved in this attribute.
 
     def preprocess(
-        self,
-        data: pd.DataFrame,
-        target_column: str = None
-    ) -> Union(Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame):
+        self, data: pd.DataFrame, target_column: str = None
+    ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
         """
         Prepare raw data for training or predict.
 
@@ -28,11 +24,7 @@ class DelayModel:
         """
         return
 
-    def fit(
-        self,
-        features: pd.DataFrame,
-        target: pd.DataFrame
-    ) -> None:
+    def fit(self, features: pd.DataFrame, target: pd.DataFrame) -> None:
         """
         Fit model with preprocessed data.
 
@@ -42,16 +34,13 @@ class DelayModel:
         """
         return
 
-    def predict(
-        self,
-        features: pd.DataFrame
-    ) -> List[int]:
+    def predict(self, features: pd.DataFrame) -> List[int]:
         """
         Predict delays for new flights.
 
         Args:
             features (pd.DataFrame): preprocessed data.
-        
+
         Returns:
             (List[int]): predicted targets.
         """
