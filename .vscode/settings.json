@@ -1,0 +1,40 @@
+{
+    // Set correct python path to venv's one
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    // Hide .venv from explorer and searchbar
+    "files.watcherExclude": {
+        "**/.venv/**": true
+    },
+    "files.exclude": {
+        "**/.venv/": true
+    },
+    "search.exclude": {
+        "**/.venv/": true
+    },
+    // Linting and formatting
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    // auto formatter
+    "black-formatter.importStrategy": "fromEnvironment",
+    // import formatter
+    "isort.importStrategy": "fromEnvironment",
+    "isort.args": [
+        "--settings-path",
+        "${workspaceFolder}/pyproject.toml"
+    ],
+    // linting
+    "flake8.importStrategy": "fromEnvironment",
+    "flake8.args": [
+        "--config=${workspaceFolder}/.flake8"
+    ],
+    "editor.wordWrapColumn": 100,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    //
+    // Jupyter
+    //
+    "jupyter.notebookFileRoot": "${workspaceFolder}",
+    "jupyter.interactiveWindow.textEditor.executeSelection": true,
+}
