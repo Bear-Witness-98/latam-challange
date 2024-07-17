@@ -1,6 +1,4 @@
-import calendar
 import sys
-from enum import Enum
 
 import fastapi
 import pandas as pd
