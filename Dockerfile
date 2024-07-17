@@ -15,6 +15,7 @@ COPY models/ ./models
 # add empty README and install
 RUN touch README.md
 RUN poetry config virtualenvs.create false
+RUN poetry lock --no-update
 RUN poetry install --only main
 
 
