@@ -71,7 +71,7 @@ class FlightData(BaseModel):
 
 app = fastapi.FastAPI()
 model = DelayModel()
-model.load_model("tmp/models")
+model.load_model("models")
 
 
 def flight_data_to_pandas(flight_data: FlightData) -> pd.DataFrame:
