@@ -16,4 +16,4 @@ RUN touch README.md
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev
 
-CMD ["python", "-m", "uvicorn", "challenge.api:app", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "challenge.api:app", "--host", "0.0.0.0", "--port", "8000"]
