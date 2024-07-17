@@ -17,6 +17,9 @@ region="us-west1"
 DOCKER_IMAGE_FORMAT="docker.pkg.dev" # script is not intended to work by modifying this value
 repo_address="${region}-${DOCKER_IMAGE_FORMAT}/${current_project}/${repo_name}"
 
+# run training
+python challenge/model.py
+
 # allow docker to authenticate to gcp
 gcloud auth configure-docker ${region}-${DOCKER_IMAGE_FORMAT}
 
