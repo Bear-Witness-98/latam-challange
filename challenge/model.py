@@ -168,10 +168,6 @@ if __name__ == "__main__":
         target_validation, predicted_target, output_dict=True
     )
 
-    import ipdb
-
-    ipdb.set_trace()
-
     # save
     model.save_model("challenge/models")
 
