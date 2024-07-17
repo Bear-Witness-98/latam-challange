@@ -15,7 +15,7 @@ COPY models/ ./models
 # add empty README and install
 RUN touch README.md
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev
+RUN poetry install --only main
 
 
 CMD ["python", "-m", "uvicorn", "challenge.api:app", "--host", "0.0.0.0", "--port", "8080"]
