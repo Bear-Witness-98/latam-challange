@@ -35,6 +35,7 @@ def get_delay_target(data: pd.DataFrame) -> pd.Series:
 
 
 def get_features(data: pd.DataFrame) -> pd.DataFrame:
+    # get the one hot enconding of the columns suggested by the DS
     features = pd.concat(
         [
             pd.get_dummies(data["OPERA"], prefix="OPERA"),
@@ -50,7 +51,7 @@ def get_features(data: pd.DataFrame) -> pd.DataFrame:
 
 class DelayModel:
     def __init__(self):
-        self._model = None  # Model should be saved in this attribute.
+        self._model = self._model = LogisticRegression()
 
     def preprocess(
         self, data: pd.DataFrame, target_column: Optional[str] = None
@@ -67,25 +68,17 @@ class DelayModel:
             or
             pd.DataFrame: features.
         """
-        # process default target column
-        default_target = "delay"
-
-        if target_column:
-            self.target = target_column
-        else:
-            self.target = default_target
-
-        # get specific target computation function
-        if self.target == "delay":
-            y = get_delay_target(data)  # needs conversion to dataframe
-        else:
-            raise NotImplementedError("Only implemented 'delay' as target column")
-
-        y = y.to_frame()
-
+        # retrieve features from the data
         x = get_features(data)
 
-        return (x, y) if target_column else x
+        # return different sets, depending on the target
+        if target_column is None:
+            return x
+        elif target_column == "delay":
+            y = get_delay_target(data).to_frame()
+            return (x, y)
+        else:
+            raise NotImplementedError("Only implemented 'delay' as target column")
 
     def fit(self, features: pd.DataFrame, target: pd.DataFrame) -> None:
         """
@@ -95,14 +88,20 @@ class DelayModel:
             features (pd.DataFrame): preprocessed data.
             target (pd.DataFrame): target.
         """
-        n_y0 = len(target[target[self.target] == 0])
-        n_y1 = len(target[target[self.target] == 1])
+        # target is assume to only have one column (uni-dimensional target)
+        target_column = target.columns[0]
 
+        # get values to compensate unbalancing
+        n_y0 = len(target[target[target_column] == 0])
+        n_y1 = len(target[target[target_column] == 1])
+
+        # instantiate model and fit
         self._model = LogisticRegression(
             class_weight={1: n_y0 / len(target), 0: n_y1 / len(target)}
         )
-        self._model.fit(features, target[self.target])
+        self._model.fit(features, target[target_column])
 
+        # for scikitlearn compatibility
         return self
 
     def predict(self, features: pd.DataFrame) -> List[int]:
@@ -115,7 +114,4 @@ class DelayModel:
         Returns:
             (List[int]): predicted targets.
         """
-        if self._model is None:
-            raise RuntimeError("Model not fitted before calling .predict")
-
         return self._model.predict(features).tolist()
