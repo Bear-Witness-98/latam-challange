@@ -71,6 +71,7 @@ class FlightData(BaseModel):
 
 app = fastapi.FastAPI()
 model = DelayModel()
+model.load_model("tmp/models")
 
 
 def flight_data_to_pandas(flight_data: FlightData) -> pd.DataFrame:
@@ -119,7 +120,6 @@ async def post_predict(flight_data: FlightData) -> dict:
     flight_data_df = flight_data_to_pandas(flight_data)
     preprocessed_data = model.preprocess(flight_data_df)
 
-    model.load_model("tmp/models")
     column_order = model._model.feature_names_in_
     preprocessed_data = preprocessed_data[column_order]
 
