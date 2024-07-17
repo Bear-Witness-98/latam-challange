@@ -58,3 +58,7 @@ by the number of features, and not on a highly tunned hyperparameter (as the
 number of trees in xgboost). Also, it has the advantage that we can limit
 ourselves to only one framework (scikit learn), and have less imcompatibility
 issues when trying to move our model to production.
+
+## deployment
+
+application deployed to:  https://delay-model-api-qzo5moezqa-uw.a.run.app
