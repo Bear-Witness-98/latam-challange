@@ -31,6 +31,9 @@ feature-wise, given their poor initial performance, and the great increase in
 performance that happened only by addressing the dataset unbalance. May need a
 revision on feature analysis after the balancing or a better exlpanation of
 this decision.
+4. The 10 features you selected to train with, are not the top 10 I am seeing in
+the graph of feature importance from the xgboost. I think it might be due to
+some random see issue. Would you care to go over it?
 
 Also pointed out some comments in the code, but wouldn't bother the DS with
 them, as it was not the main focus of the work.
