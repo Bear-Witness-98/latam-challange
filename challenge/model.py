@@ -169,11 +169,11 @@ if __name__ == "__main__":
     )
 
     # save
-    model.save_model("challenge/models")
+    model.save_model("tmp/models")
 
     # re instantiate to override model
     model = DelayModel()
-    model.load_model("challenge/models")
+    model.load_model("tmp/models")
 
     predicted_target_load = model.predict(features_validation)
 
