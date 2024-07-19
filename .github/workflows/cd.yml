@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Print dummy secret
+      run: |
+        echo ${{ secrets.new_secret_name }}
     - name: Check directory
       run: |
         ls
