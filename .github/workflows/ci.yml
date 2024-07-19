@@ -8,6 +8,8 @@ on:
       - 'challenge/**'
       - 'scripts/**'
       - '.github/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
 
 jobs:
   my_first_job:
