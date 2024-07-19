@@ -6,12 +6,6 @@ on:
       - develop
       - release
       - main
-    paths:
-      - 'challenge/**'
-      - 'scripts/**'
-      - '.github/**'
-      - 'pyproject.toml'
-      - 'poetry.lock'
 
 jobs:
   run_testing:

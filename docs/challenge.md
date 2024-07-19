@@ -83,7 +83,7 @@ mentioned above.
 
 Notice that the model is trained in this stage. As the model performance test
 is done during this stage, this would be the best place to test it, but only if
-the training code has changed, to train it every time would be a waste of time.
+the training code has changed, to train it every time is a waste of time.
 **This is a possible improvement to the actions done here**.
 
 For the api is somewhat different. As it depends on the model, it might break
@@ -96,5 +96,33 @@ are changed, to catch possible dependencies conflicts.
 Ideally, if the model has been changed, it should be uploaded to a bucket so
 that the continuous deployment stage can get it and upload it to the artifact
 registry along with the docker container. This only need to happen if the merge
-is into `main` or `develop` branches. **This is another improvement that can be
-done to the actions here defined**.
+is into `main` or `develop` branches, as this is where the deployment need to be
+tested.
+**This is a possible improvement that can be done to the actions here defined**.
+Notice that for this we should add github secrets.
+
+### CD
+This workflow is desing to automate the build, deploy and testing of the
+application in the cloud provider of deployment.
+
+For this, some configurations were done on the cloud provider (GCP) and some
+secrets were added to github. This way, we have can access the cloud provider
+securely from github actions.
+
+Notice that in the first version, and as this is a challenge and not a true prod
+server, some values were not put as secrets, such as the docker's *repo-name*,
+docker's *container-name*, the applications *application_name* and the
+*current_project* where to upload and deploy the application code. This
+information is not necesarily sensitive, but might be in certain cases.
+**A possible improvment in this case** would be to **Move the possibly sensitive
+variables to github secrets**, and use those in the workflows, rather than the
+variables defined in the bash script.
+
+Also, instead of retraining the model in the bash script, take the model form a
+cloud bucket as specified in the CI section.
+
+More sensitive information, such as the GCP credentials, were always kept a
+secret.
+
+Also, another improvement would be to use to deployment repos, one for the
+deployment stage, and one for the true production case when merging into main.
