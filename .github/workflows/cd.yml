@@ -16,9 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Print dummy secret
-      run: |
-        echo ${{ secrets.new_secret_name }}
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIAL }}
     - name: Check directory
       run: |
         ls
