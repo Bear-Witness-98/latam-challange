@@ -5,7 +5,6 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 
 
@@ -26,7 +25,7 @@ class DelayModel:
     THRESHOLD_IN_MINUTES = 15
 
     def __init__(self):
-        self._model = LogisticRegression()
+        self._model = XGBClassifier()
 
     def _get_min_diff(self, data: pd.Series) -> float:
         """
@@ -133,10 +132,11 @@ class DelayModel:
         # get values to compensate unbalancing
         n_y0 = len(target[target[target_column] == 0])
         n_y1 = len(target[target[target_column] == 1])
+        scale = n_y0 / n_y1
 
         # instantiate model and fit
-        self._model = LogisticRegression(
-            class_weight={1: n_y0 / len(target), 0: n_y1 / len(target)}
+        self._model = XGBClassifier(
+            random_state=1, learning_rate=0.01, scale_pos_weight=scale
         )
         self._model.fit(features, target[target_column])
 
