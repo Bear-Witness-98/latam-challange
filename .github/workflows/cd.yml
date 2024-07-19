@@ -1,0 +1,48 @@
+name: 'Continuous Delivery'
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'challenge/**'
+      - 'scripts/**'
+      - '.github/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
+
+jobs:
+  run_testing:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIAL }}
+    - name: Check directory
+      run: |
+        ls
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10.8'
+    - name: Python version
+      run: |
+        python --version
+    - name: Install poetry and virtualenv
+      run: |
+        pip install poetry
+    - name: Install dependencies
+      run: |
+        poetry config virtualenvs.create false
+        poetry lock --no-update
+        poetry install
+    - name: Push to prod
+      run: |
+        bash scripts/deploy.sh
+    - name: Run stress test
+      run: |
+        make stress-test
