@@ -37,6 +37,9 @@ jobs:
     - name: Get model
       run:
         python challenge/model.py
-    - name: Run tests
+    - name: Run model test
       run: |
         make model-test
+    - name: Run api test
+      run: |
+        make api-test
