@@ -10,10 +10,21 @@ on:
       - '.github/**'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  my_first_job:
+    runs-on: ubuntu-latest # put this in an environment?
     steps:
-    - uses: actions/checkout@v2
+    - name: Python version
+      run: |
+        python --version
+    - name: Install poetry
+      run: |
+        pip install poetry
+    - name: Install dependencies
+      run: |
+      poetry install
+    - name: Start poetry shell
+      run: |
+        poetry shell
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
