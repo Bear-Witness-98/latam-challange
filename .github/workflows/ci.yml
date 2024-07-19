@@ -25,6 +25,9 @@ jobs:
     - name: Install poetry
       run: |
         pip install poetry
+    - name: Check directory
+      run: |
+        ls
     - name: Install dependencies
       run: |
         poetry install
