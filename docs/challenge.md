@@ -126,3 +126,7 @@ secret.
 
 Also, another improvement would be to use to deployment repos, one for the
 deployment stage, and one for the true production case when merging into main.
+
+Also, the URL if deployment should be taken from the deployment script, and
+passed onto the testing script, as this url is variable, and defined by the
+cloud provider.
