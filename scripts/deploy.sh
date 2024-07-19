@@ -12,7 +12,7 @@
 repo_name="delay-model-image"
 container_tag="delay-model-container"
 service_name="delay-model-api"
-current_project=$(gcloud config get-value project)
+current_project="santiago-tryolabs-latam"  # $(gcloud config get-value project)
 region="us-west1"
 DOCKER_IMAGE_FORMAT="docker.pkg.dev" # script is not intended to work by modifying this value
 repo_address="${region}-${DOCKER_IMAGE_FORMAT}/${current_project}/${repo_name}"
