@@ -59,11 +59,41 @@ number of trees in xgboost). Also, it has the advantage that we can limit
 ourselves to only one framework (scikit learn), and have less imcompatibility
 issues when trying to move our model to production.
 
-## deployment
+## Part III - Deployment to Cloud
 
-application deployed to:  https://delay-model-api-qzo5moezqa-uw.a.run.app
+A first step for deployin to cloud, is to build a Dockerfile for our application
+to live in. This has multiple pros, but the most importants are:
+1. GCP has a method to directly deploy Docker containers.
+2. It generates a specific environment for our application to work in, having
+full control of what system's software resources are needed.
 
+This dockerfile just installs a few system dependencies, and the application as
+a module with poetry.
 
+For the proper cloud deployment, a script was done to automate the process. As
+it was suggested, the deployment was done on GCP.
+
+The script was parametrized so that different names could be used for the cloud
+artifacts, and make it more scalable if the deployment wanted to be made on the
+deployment branch, or in the main branch.
+
+This script uses the `gcloud` tool, provided by google, to manage GCP resources.
+Orignally, the script expected to set the current project in this cli tool to
+then deploy there, but for scalability reasons (having more than one project),
+a specific project was selected.
+
+The deployment script does:
+1. Train the model with the available data.
+2. Connects locally docker with gcloud.
+3. Creates repo to push docker image generated and pushes it there.
+4. Prompts gcloud with the running of the container.
+
+This deploys the aplication in the 8080 port of the url:
+
+`https://delay-model-api-qzo5moezqa-uw.a.run.app`
+
+A modification was done to the makefile that generated the tests so that the
+stress test would be done to this url.
 
 
 ## Part IV - CI/CD
