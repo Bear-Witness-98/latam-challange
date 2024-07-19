@@ -34,6 +34,9 @@ jobs:
         poetry config virtualenvs.create false
         poetry lock --no-update
         poetry install
+    - name: Get model
+      run:
+        python challenge/model.py
     - name: Run tests
       run: |
         make model-test
