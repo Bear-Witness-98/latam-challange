@@ -62,3 +62,39 @@ issues when trying to move our model to production.
 ## deployment
 
 application deployed to:  https://delay-model-api-qzo5moezqa-uw.a.run.app
+
+
+
+
+## Part IV - CI/CD
+
+For this part, as explicitly asked, copied the files from workflows to
+.github/workflows, and completed with relevant instructions for github actions
+to complete.
+
+Then, after having an initial version of both, a rule was added to the
+repository, such that the workflows need to be satisfactory to be able to merge
+in the `develop`, `release` and `main` branches.
+
+### CI
+This workflow was defined to ensure the sanity of the code, by running the
+functional tests each time the code is intended to be merged in the branches
+mentioned above.
+
+Notice that the model is trained in this stage. As the model performance test
+is done during this stage, this would be the best place to test it, but only if
+the training code has changed, to train it every time would be a waste of time.
+**This is a possible improvement to the actions done here**.
+
+For the api is somewhat different. As it depends on the model, it might break
+without changing anything from the `api.py` file. So, at least for the code we
+have now, it should be tested everytime a `.py` file is modified.
+
+The test should be done for both the model and the api in case the dependencies
+are changed, to catch possible dependencies conflicts.
+
+Ideally, if the model has been changed, it should be uploaded to a bucket so
+that the continuous deployment stage can get it and upload it to the artifact
+registry along with the docker container. This only need to happen if the merge
+is into `main` or `develop` branches. **This is another improvement that can be
+done to the actions here defined**.
