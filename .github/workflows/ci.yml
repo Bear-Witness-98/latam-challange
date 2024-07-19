@@ -15,6 +15,10 @@ jobs:
   my_first_job:
     runs-on: ubuntu-latest # put this in an environment?
     steps:
+    - uses: actions/checkout@v4
+    - name: Check directory
+      run: |
+        ls
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -22,18 +26,14 @@ jobs:
     - name: Python version
       run: |
         python --version
-    - uses: actions/checkout@v4
     - name: Install poetry and virtualenv
       run: |
         pip install virtualenv
         pip install poetry
-    - name: Check directory
-      run: |
-        ls
     - name: Install dependencies
       run: |
         poetry config virtualenvs.in-project true
-        poetry install
+        poetry install --with test
     - name: start virtualenv manually
       run: |
         source .venv/bin/activate
