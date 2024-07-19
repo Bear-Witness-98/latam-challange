@@ -28,15 +28,12 @@ jobs:
         python --version
     - name: Install poetry and virtualenv
       run: |
-        pip install virtualenv
         pip install poetry
     - name: Install dependencies
       run: |
-        poetry config virtualenvs.in-project true
-        poetry install --with test
-    - name: start virtualenv manually
-      run: |
-        source .venv/bin/activate
+        poetry config virtualenvs.create false
+        poetry lock --no-update
+        poetry install
     - name: Run tests
       run: |
         make model-test
