@@ -22,6 +22,7 @@ jobs:
     - name: Python version
       run: |
         python --version
+    - uses: actions/checkout@v4
     - name: Install poetry
       run: |
         pip install poetry
