@@ -125,7 +125,7 @@ async def post_predict(flight_data: FlightData) -> dict:
         flight_data_df = flight_data_to_pandas(flight_data)
         preprocessed_data = model.preprocess(flight_data_df)
 
-        # sorts column too feed the model
+        # sorts column to feed the model
         column_order = model._model.feature_names_in_
         preprocessed_data = preprocessed_data[column_order]
 
