@@ -12,8 +12,8 @@ on:
       - 'poetry.lock'
 
 jobs:
-  my_first_job:
-    runs-on: ubuntu-latest # put this in an environment?
+  run_testing:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Check directory
