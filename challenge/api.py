@@ -1,17 +1,9 @@
-import sys
-
 import fastapi
 import pandas as pd
 from fastapi import HTTPException
 from pydantic import BaseModel, validator
 
 from challenge.model import DelayModel
-
-
-def print_to_file(whatever: any):
-    with open("file.txt", "a") as sys.stdout:
-        print(whatever)
-
 
 VALID_OPERA_VALUES = [
     "american airlines",
