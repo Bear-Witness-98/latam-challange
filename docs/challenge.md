@@ -59,6 +59,28 @@ number of trees in xgboost). Also, it has the advantage that we can limit
 ourselves to only one framework (scikit learn), and have less imcompatibility
 issues when trying to move our model to production.
 
+## Part II API developement
+
+Developed an api to serve the model's predictions properly.
+
+There is a welcome message at the root (`/`) entry-point, a health status check
+at the `/health` entry-point, and the prediction service at the `/predict`
+entry-point.
+
+This API, expects a directory named `models/` at the level of its execution,
+where the model object will look for a `model.pkl` file, which stores a trained
+instance of the selected model.
+
+Notice that the api mostly manages the reception of information, and does little
+processing, i.e. convert the input list of flights into a pandas dataframe.
+
+Also, while on the prediction stage, where an error may occur, I've decided to
+not report the error directly to the client, but to log it in an internal file,
+and return a 500 error. This is not scalable, it's just an ad-hoc solution to
+unwanted information leak to the client side of the api. Lot more information
+could be into the log, and could be done with a proper library. But just to
+showcase the proper railguard that needs to be there.
+
 ## Part III - Deployment to Cloud
 
 A first step for deployin to cloud, is to build a Dockerfile for our application

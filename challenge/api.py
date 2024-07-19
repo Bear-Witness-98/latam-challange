@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import fastapi
 import pandas as pd
 from fastapi import HTTPException
@@ -39,6 +41,11 @@ VALID_TIPO_VUELO_VALUES = [
 VALID_MES_VALUES = range(1, 13)
 
 
+app = fastapi.FastAPI()
+model = DelayModel()
+model.load_model("models")
+
+
 class Flight(BaseModel):
     OPERA: str
     TIPOVUELO: str
@@ -50,8 +57,8 @@ class Flight(BaseModel):
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    f"Value for tipo vuelo not valid. Recieved {opera_value},"
-                    f" expected one from {VALID_OPERA_VALUES}"
+                    f"Value for tipo vuelo not valid. Recieved {opera_value}, "
+                    f"expected one from {VALID_OPERA_VALUES}"
                 ),
             )
         return opera_value
@@ -62,8 +69,8 @@ class Flight(BaseModel):
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    f"Value for tipo vuelo not valid. Recieved {tipo_vuelo_value},"
-                    f" expected one from {VALID_TIPO_VUELO_VALUES}"
+                    f"Value for tipo vuelo not valid. Recieved {tipo_vuelo_value}, "
+                    f"expected one from {VALID_TIPO_VUELO_VALUES}"
                 ),
             )
         return tipo_vuelo_value
@@ -74,8 +81,8 @@ class Flight(BaseModel):
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    f"Value for tipo vuelo not valid. Recieved {mes_value},"
-                    f" expected one from {VALID_MES_VALUES}"
+                    f"Value for tipo vuelo not valid. Recieved {mes_value}, "
+                    f"expected one from {VALID_MES_VALUES}"
                 ),
             )
         return mes_value
@@ -83,11 +90,6 @@ class Flight(BaseModel):
 
 class FlightData(BaseModel):
     flights: list[Flight]
-
-
-app = fastapi.FastAPI()
-model = DelayModel()
-model.load_model("models")
 
 
 def flight_data_to_pandas(flight_data: FlightData) -> pd.DataFrame:
@@ -118,13 +120,23 @@ async def get_health() -> dict:
 
 @app.post("/predict", status_code=200)
 async def post_predict(flight_data: FlightData) -> dict:
-    # get data and convert to pandas dataframe
-    flight_data_df = flight_data_to_pandas(flight_data)
-    preprocessed_data = model.preprocess(flight_data_df)
+    try:
+        # get data and convert to pandas dataframe
+        flight_data_df = flight_data_to_pandas(flight_data)
+        preprocessed_data = model.preprocess(flight_data_df)
 
-    column_order = model._model.feature_names_in_
-    preprocessed_data = preprocessed_data[column_order]
+        # sorts column too feed the model
+        column_order = model._model.feature_names_in_
+        preprocessed_data = preprocessed_data[column_order]
 
-    pred = model.predict(preprocessed_data)
+        pred = model.predict(preprocessed_data)
 
-    return {"predict": pred}
+        return {"predict": pred}
+    except Exception as e:
+        # there may be exceptions we don't want to send to the clients, so log them in
+        # an internal file for debugging. Just as a cheap solution.
+        with open("error_logs.txt", "a") as f:
+            f.write(f"{datetime.now(timezone.utc)}: encounter error {e}")
+        raise HTTPException(
+            status_code=500, detail="Internal server error during prediction"
+        )
