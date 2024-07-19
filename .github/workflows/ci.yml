@@ -21,7 +21,7 @@ jobs:
         pip install poetry
     - name: Install dependencies
       run: |
-      poetry install
+        poetry install
     - name: Start poetry shell
       run: |
         poetry shell
