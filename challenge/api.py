@@ -126,9 +126,6 @@ async def post_predict(flight_data: FlightData) -> dict:
         preprocessed_data = model.preprocess(flight_data_df)
 
         # sorts column to feed the model
-        column_order = model._model.feature_names_in_
-        preprocessed_data = preprocessed_data[column_order]
-
         pred = model.predict(preprocessed_data)
 
         return {"predict": pred}
@@ -138,5 +135,5 @@ async def post_predict(flight_data: FlightData) -> dict:
         with open("error_logs.txt", "a") as f:
             f.write(f"{datetime.now(timezone.utc)}: encounter error {e}")
         raise HTTPException(
-            status_code=500, detail="Internal server error during prediction"
+            status_code=500, detail="Internal server error during prediction."
         )
