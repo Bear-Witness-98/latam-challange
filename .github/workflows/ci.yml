@@ -1,0 +1,46 @@
+name: 'Continuous Integration'
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'challenge/**'
+      - 'scripts/**'
+      - '.github/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
+
+jobs:
+  run_testing:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check directory
+      run: |
+        ls
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10.8'
+    - name: Python version
+      run: |
+        python --version
+    - name: Install poetry and virtualenv
+      run: |
+        pip install poetry
+    - name: Install dependencies
+      run: |
+        poetry config virtualenvs.create false
+        poetry lock --no-update
+        poetry install
+    - name: Get model
+      run:
+        python challenge/model.py
+    - name: Run model test
+      run: |
+        make model-test
+    - name: Run api test
+      run: |
+        make api-test
