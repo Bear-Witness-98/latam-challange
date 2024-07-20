@@ -5,62 +5,91 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
-
-FEATURES_COLS = [
-    "OPERA_Latin American Wings",
-    "MES_7",
-    "MES_10",
-    "OPERA_Grupo LATAM",
-    "MES_12",
-    "TIPOVUELO_I",
-    "MES_4",
-    "MES_11",
-    "OPERA_Sky Airline",
-    "OPERA_Copa Air",
-]
-
-
-def get_min_diff(data):
-    fecha_o = datetime.strptime(data["Fecha-O"], "%Y-%m-%d %H:%M:%S")
-    fecha_i = datetime.strptime(data["Fecha-I"], "%Y-%m-%d %H:%M:%S")
-    min_diff = ((fecha_o - fecha_i).total_seconds()) / 60
-    return min_diff
-
-
-def get_delay_target(data: pd.DataFrame) -> pd.Series:
-    data["min_diff"] = data.apply(get_min_diff, axis=1)
-    threshold_in_minutes = 15
-    data["delay"] = np.where(data["min_diff"] > threshold_in_minutes, 1, 0)
-
-    return data["delay"].to_frame()
-
-
-def get_features(data: pd.DataFrame) -> pd.DataFrame:
-    # get the one hot enconding of the columns suggested by the DS
-    features = pd.concat(
-        [
-            pd.get_dummies(data["OPERA"], prefix="OPERA"),
-            pd.get_dummies(data["TIPOVUELO"], prefix="TIPOVUELO"),
-            pd.get_dummies(data["MES"], prefix="MES"),
-        ],
-        axis=1,
-    )
-    present_features = list(set(FEATURES_COLS).intersection(set(features.columns)))
-    missing_features = list(set(FEATURES_COLS).difference(set(features.columns)))
-
-    features = features[present_features]
-
-    # fill missing features with 0 due to one-hot encoding of features
-    for feature in missing_features:
-        features[feature] = 0
-
-    return features
+from xgboost import XGBClassifier
 
 
 class DelayModel:
+    FEATURES_COLS = [
+        "MES_4",
+        "MES_7",
+        "MES_10",
+        "MES_11",
+        "MES_12",
+        "OPERA_Copa Air",
+        "OPERA_Grupo LATAM",
+        "OPERA_Latin American Wings",
+        "OPERA_Sky Airline",
+        "TIPOVUELO_I",
+    ]
+
+    THRESHOLD_IN_MINUTES = 15
+
     def __init__(self):
-        self._model = LogisticRegression()
+        self._model = XGBClassifier()
+
+    def _get_min_diff(self, data: pd.Series) -> float:
+        """
+        Auxiliary function to get target.
+
+        Args:
+            data (pd.Series): raw data row.
+
+        Returns:
+            float: difference between two rows in minutes.
+        """
+        fecha_o = datetime.strptime(data["Fecha-O"], "%Y-%m-%d %H:%M:%S")
+        fecha_i = datetime.strptime(data["Fecha-I"], "%Y-%m-%d %H:%M:%S")
+        min_diff = ((fecha_o - fecha_i).total_seconds()) / 60
+        return min_diff
+
+    def _get_delay_target(self, data: pd.DataFrame) -> pd.Series:
+        """
+        Compute and return target to train the model with, from raw data.
+
+        Args:
+            data (pd.DataFrame): raw data.
+
+        Returns:
+            pd.Series: target to predict.
+        """
+        data["min_diff"] = data.apply(self._get_min_diff, axis=1)
+        data["delay"] = np.where(data["min_diff"] > self.THRESHOLD_IN_MINUTES, 1, 0)
+
+        return data["delay"].to_frame()
+
+    def _get_features(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Compute and return input features to feed the model from raw data.
+
+        Args:
+            data (pd.DataFrame): raw_data.
+
+        Returns:
+            pd.DataFrame: features with columns in a specific order.
+        """
+        # get the one hot enconding of the columns suggested by the DS
+        # the existance of these three columns is enforced by the api above this code
+        features = pd.concat(
+            [
+                pd.get_dummies(data["OPERA"], prefix="OPERA"),
+                pd.get_dummies(data["TIPOVUELO"], prefix="TIPOVUELO"),
+                pd.get_dummies(data["MES"], prefix="MES"),
+            ],
+            axis=1,
+        )
+        valid_features = list(
+            set(self.FEATURES_COLS).intersection(set(features.columns))
+        )
+        missing_features = list(
+            set(self.FEATURES_COLS).difference(set(features.columns))
+        )
+
+        # get valid features and fill missin with  0 due to one-hot encoding
+        features = features[valid_features]
+        features[missing_features] = 0
+
+        # return dataframe with sorted columns
+        return features[self.FEATURES_COLS]
 
     def preprocess(
         self, data: pd.DataFrame, target_column: Optional[str] = None
@@ -78,20 +107,20 @@ class DelayModel:
             pd.DataFrame: features.
         """
         # retrieve features from the data
-        x = get_features(data)
+        x = self._get_features(data)
 
         # return different sets, depending on the target
         if target_column is None:
             return x
         elif target_column == "delay":
-            y = get_delay_target(data)
+            y = self._get_delay_target(data)
             return (x, y)
         else:
             raise NotImplementedError("Only implemented 'delay' as target column")
 
     def fit(self, features: pd.DataFrame, target: pd.DataFrame) -> None:
         """
-        Fit model with preprocessed data.
+        Fit model with data preprocessed by this class.
 
         Args:
             features (pd.DataFrame): preprocessed data.
@@ -103,10 +132,11 @@ class DelayModel:
         # get values to compensate unbalancing
         n_y0 = len(target[target[target_column] == 0])
         n_y1 = len(target[target[target_column] == 1])
+        scale = n_y0 / n_y1
 
         # instantiate model and fit
-        self._model = LogisticRegression(
-            class_weight={1: n_y0 / len(target), 0: n_y1 / len(target)}
+        self._model = XGBClassifier(
+            random_state=1, learning_rate=0.01, scale_pos_weight=scale
         )
         self._model.fit(features, target[target_column])
 
@@ -130,7 +160,7 @@ class DelayModel:
 
     def predict(self, features: pd.DataFrame) -> List[int]:
         """
-        Predict delays for new flights.
+        Predict delays for new flights on data preprocessed by this class.
 
         Args:
             features (pd.DataFrame): preprocessed data.
@@ -146,38 +176,20 @@ class DelayModel:
         return pred
 
 
-if __name__ == "__main__":
-    from sklearn.metrics import classification_report, mean_squared_error
-    from sklearn.model_selection import train_test_split
+def main():
+    # perform a training of the model with all available data for production deployment
 
-    # perform a training of the model for production deployment
+    # get data and initial model
     model = DelayModel()
     data = pd.read_csv(filepath_or_buffer="data/data.csv")
 
+    # preprocess data and fit
     features, target = model.preprocess(data=data, target_column="delay")
-
-    _, features_validation, _, target_validation = train_test_split(
-        features, target, test_size=0.33, random_state=42
-    )
-
     model.fit(features=features, target=target)
-
-    predicted_target = model.predict(features_validation)
-
-    report = classification_report(
-        target_validation, predicted_target, output_dict=True
-    )
 
     # save
     model.save_model("models")
 
-    # re instantiate to override model
-    model = DelayModel()
-    model.load_model("models")
 
-    predicted_target_load = model.predict(features_validation)
-
-    print(
-        "The difference in prediction is:"
-        f" {mean_squared_error(predicted_target, predicted_target_load)}"
-    )
+if __name__ == "__main__":
+    main()
